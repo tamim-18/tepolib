@@ -1,1 +1,3 @@
-console.log("Welcome to the server!");
+import app from "./src/app";
+
+//seting up the server
