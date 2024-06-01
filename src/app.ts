@@ -4,6 +4,8 @@ import globalErrorHandler from "./middlewares/globalErrorHandler";
 import userRouter from "./user/userRouter";
 
 const app = express();
+// express.json() is a middleware for the json formatting
+app.use(express.json());
 //routes
 //http methods are:
 //GET, POST, PUT, DELETE
