@@ -1,7 +1,9 @@
 // creating user
 
 import { NextFunction, Request, Response } from "express";
+import bcrypt from "bcrypt";
 import createHttpError from "http-errors";
+import userModel from "./userModel";
 
 const createrUser = async (req: Request, res: Response, next: NextFunction) => {
   //validation
@@ -11,6 +13,22 @@ const createrUser = async (req: Request, res: Response, next: NextFunction) => {
     const error = createHttpError(400, "All fields are required");
     return next(error);
   }
+
+  //database call
+  const user = await userModel.findOne({ email: email });
+  if (user) {
+    const error = createHttpError(400, "User already exists");
+    // why 400 status code?
+    // because the request is bad. The user is trying to create a user that already exists.
+    return next(error);
+  }
+
+  //create user. store the user in the database
+  // hashig using bcrypt
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  await userModel.create({ name, email, password });
 
   //process
   //response
