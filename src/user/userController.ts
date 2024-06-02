@@ -28,11 +28,16 @@ const createrUser = async (req: Request, res: Response, next: NextFunction) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  await userModel.create({ name, email, password });
+  const newUser = await userModel.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
 
-  //process
+  // token generation
+
   //response
-  res.json({ message: "User created" });
+  res.json({ id: newUser._id });
 };
 
 export { createrUser };
