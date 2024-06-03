@@ -4,11 +4,12 @@ import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import createHttpError from "http-errors";
 import userModel from "./userModel";
+import { sign } from "jsonwebtoken";
 
 const createrUser = async (req: Request, res: Response, next: NextFunction) => {
   //validation
   const { name, email, password } = req.body;
-  console.log(name);
+  // console.log(name);
   if (!name || !email || !password) {
     const error = createHttpError(400, "All fields are required");
     return next(error);
@@ -34,10 +35,15 @@ const createrUser = async (req: Request, res: Response, next: NextFunction) => {
     password: hashedPassword,
   });
 
-  // token generation
+  // token generation using jwt
+  // jwt.sign({payload}, secret, {options})
+  // options: expiresIn, algorithm, issuer, audience
+  const token = sign({ id: newUser._id }, process.env.JWT_SECRET as string, {
+    expiresIn: "1h",
+  });
 
   //response
-  res.json({ id: newUser._id });
+  res.json({ accessToken: token });
 };
 
 export { createrUser };
