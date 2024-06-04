@@ -1,3 +1,4 @@
+import { User } from "./userTypes";
 // creating user
 
 import { NextFunction, Request, Response } from "express";
@@ -16,12 +17,16 @@ const createrUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   //database call
-  const user = await userModel.findOne({ email: email });
-  if (user) {
-    const error = createHttpError(400, "User already exists");
-    // why 400 status code?
-    // because the request is bad. The user is trying to create a user that already exists.
-    return next(error);
+  try {
+    const user = await userModel.findOne({ email: email });
+    if (user) {
+      const error = createHttpError(400, "User already exists");
+      // why 400 status code?
+      // because the request is bad. The user is trying to create a user that already exists.
+      return next(error);
+    }
+  } catch (error) {
+    return next(createHttpError(500, "Something went wrong"));
   }
 
   //create user. store the user in the database
@@ -29,11 +34,16 @@ const createrUser = async (req: Request, res: Response, next: NextFunction) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await userModel.create({
-    name,
-    email,
-    password: hashedPassword,
-  });
+  let newUser: User;
+  try {
+    newUser = await userModel.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
+  } catch (error) {
+    return next(createHttpError(500, "Something went wrong"));
+  }
 
   // token generation using jwt
   // jwt.sign({payload}, secret, {options})
