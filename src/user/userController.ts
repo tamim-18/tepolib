@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import createHttpError from "http-errors";
 import userModel from "./userModel";
 import { sign } from "jsonwebtoken";
+import { config } from "../config/config";
 
 const createrUser = async (req: Request, res: Response, next: NextFunction) => {
   //validation
@@ -53,10 +54,41 @@ const createrUser = async (req: Request, res: Response, next: NextFunction) => {
   });
 
   //response
-  res.json({ accessToken: token });
+  res.status(201).json({ accessToken: token });
 };
 
-export { createrUser };
+const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+  //validation
+  const { email, password } = req.body;
+  if (!email || !password) {
+    const error = createHttpError(400, "All fields are required");
+    return next(error);
+  }
+  try {
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return next(createHttpError(404, "User not found"));
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
+      return next(createHttpError(400, "username or password incorrect"));
+
+    // token generation using jwt
+    // jwt.sign({payload}, secret, {options})
+    // options: expiresIn, algorithm, issuer, audience
+    const token = sign({ sub: user._id }, config.jwtSecret as string, {
+      expiresIn: "1h",
+    });
+
+    return res.status(200).json({ accessToken: token });
+  } catch (error) {
+    return next(createHttpError(404, "User not found"));
+  }
+
+  res.status(201).json({ message: "login" });
+};
+
+export { createrUser, loginUser };
 
 // why {createrUser} instead of createrUser?
 // because we are exporting multiple things from this file.
