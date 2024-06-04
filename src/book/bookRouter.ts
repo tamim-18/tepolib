@@ -1,14 +1,14 @@
 // we have to make the user router
 import express from "express";
-import { createrUser, loginUser } from "./userController";
+import { createBook } from "./bookController";
 
-const userRouter = express.Router();
+const bookRouter = express.Router();
 
 // creating the routes
 
-userRouter.post("/register", createrUser);
-userRouter.post("/login", loginUser);
+bookRouter.post("/", createBook);
+
 // why are we using createrUser instead of createrUser()?
 // because we are passing the reference of the function to the post method.
 
-export default userRouter;
+export default bookRouter;
