@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import cloudinary from "../config/cloudinary_config";
 import createHttpError from "http-errors";
 import bookModel from "./bookModel";
+import { AuthRequest } from "../middlewares/authenticate";
 
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
   const { title, genre } = req.body;
@@ -28,16 +29,16 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
       folder: "books-pdf",
       format: "pdf",
     });
-    console.log("uploadResult", uploadResult);
-    console.log("BookuploadResult", bookUploadResult);
-    // save the book to the database
-    //@ts-ignore
-    console.log("userId: ", req.userId);
-
+    // console.log("uploadResult", uploadResult);
+    // console.log("BookuploadResult", bookUploadResult);
+    // // save the book to the database
+    // //@ts-ignore
+    // console.log("userId: ", req.userId);
+    const _req = req as AuthRequest; // Type assertion. This is to access the userId in the request object
     const newBook = await bookModel.create({
       title,
       genre,
-      author: "665d89ea1fd373bc383b3eb6",
+      author: _req.userId, // This is the userId of the author
       coverImage: uploadResult.secure_url,
       file: bookUploadResult.secure_url,
     });
