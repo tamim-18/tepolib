@@ -3,6 +3,7 @@ import express from "express";
 import { createBook } from "./bookController";
 import multer from "multer";
 import path from "node:path/posix";
+import authentication from "../middlewares/authenticate";
 
 const bookRouter = express.Router();
 // multer is a middleware for handling multipart/form-data, which is primarily used for uploading files.
@@ -18,6 +19,7 @@ const upload = multer({
 
 bookRouter.post(
   "/",
+  authentication,
   upload.fields([
     { name: "coverImage", maxCount: 1 },
     { name: "file", maxCount: 1 },
