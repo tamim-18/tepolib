@@ -50,7 +50,7 @@ const createrUser = async (req: Request, res: Response, next: NextFunction) => {
   // jwt.sign({payload}, secret, {options})
   // options: expiresIn, algorithm, issuer, audience
   const token = sign({ id: newUser._id }, process.env.JWT_SECRET as string, {
-    expiresIn: "1h",
+    expiresIn: "7d",
   });
 
   //response
@@ -77,7 +77,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     // jwt.sign({payload}, secret, {options})
     // options: expiresIn, algorithm, issuer, audience
     const token = sign({ sub: user._id }, config.jwtSecret as string, {
-      expiresIn: "1h",
+      expiresIn: "7d",
     });
 
     return res.status(200).json({ accessToken: token });

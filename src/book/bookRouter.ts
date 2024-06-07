@@ -1,6 +1,6 @@
 // we have to make the user router
 import express from "express";
-import { createBook } from "./bookController";
+import { createBook, updateBook } from "./bookController";
 import multer from "multer";
 import path from "node:path/posix";
 import authentication from "../middlewares/authenticate";
@@ -17,6 +17,7 @@ const upload = multer({
 
 // creating the routes
 
+// book creation route
 bookRouter.post(
   "/",
   authentication,
@@ -26,8 +27,17 @@ bookRouter.post(
   ]),
   createBook
 );
+// book update route
+bookRouter.patch(
+  "/:bookId",
+  authentication,
+  upload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "file", maxCount: 1 },
+  ]),
+  updateBook
+);
 
-// why are we using createrUser instead of createrUser()?
-// because we are passing the reference of the function to the post method.
+// book delete route
 
 export default bookRouter;

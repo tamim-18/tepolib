@@ -55,4 +55,21 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
   // console.log("uploadResult", uploadResult);
 };
 
-export { createBook };
+const updateBook = async (req: Request, res: Response, next: NextFunction) => {
+  const { title, genre } = req.body;
+  const bookId = req.params.bookId;
+  const book = await bookModel.findOne({ _id: bookId });
+  if (!book) {
+    return next(createHttpError(404, "Book not found"));
+  }
+  // checl if the user is the author of the book
+  const _req = req as AuthRequest;
+  if (book.author.toString() !== _req.userId) {
+    return next(
+      createHttpError(403, "You are not authorized to update this book")
+    );
+  }
+
+  res.send("update book");
+};
+export { createBook, updateBook };
