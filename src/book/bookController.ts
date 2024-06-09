@@ -7,6 +7,7 @@ import bookModel from "./bookModel";
 import { AuthRequest } from "../middlewares/authenticate";
 import { promises } from "node:dns";
 
+// create a book
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
   const { title, genre } = req.body;
   const files = req.files as { [fieldname: string]: Express.Multer.File[] }; // Type assertion
@@ -55,6 +56,7 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
 
   // console.log("uploadResult", uploadResult);
 };
+// update the book by id
 
 const updateBook = async (req: Request, res: Response, next: NextFunction) => {
   const { title, genre } = req.body;
@@ -132,4 +134,32 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
 
   res.json(updateBoook);
 };
-export { createBook, updateBook };
+
+// get all the books
+const getBook = async (req: Request, res: Response, next: NextFunction) => {
+  // we should not authenticate the books
+  //adding pagination
+
+  try {
+    // find all the books
+    const books = await bookModel.find();
+    res.json(books);
+  } catch (err) {
+    return next(createHttpError(500, "While getting all the books"));
+  }
+};
+// get single book
+const getBookById = async (req: Request, res: Response, next: NextFunction) => {
+  // validate
+  const bookId = req.params.bookId;
+  try {
+    const book = await bookModel.findOne({ _id: bookId });
+    if (!book) {
+      return next(createHttpError(404, "Book not found"));
+    }
+    res.json(book);
+  } catch (err) {
+    return next(createHttpError(500, "Error while getting a book"));
+  }
+};
+export { createBook, updateBook, getBook, getBookById };
