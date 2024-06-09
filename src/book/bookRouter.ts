@@ -1,6 +1,12 @@
 // we have to make the user router
 import express from "express";
-import { createBook, getBook, getBookById, updateBook } from "./bookController";
+import {
+  createBook,
+  deleteById,
+  getBook,
+  getBookById,
+  updateBook,
+} from "./bookController";
 import multer from "multer";
 import path from "node:path/posix";
 import authentication from "../middlewares/authenticate";
@@ -43,5 +49,6 @@ bookRouter.get("/", getBook);
 //get single book
 bookRouter.get("/:bookId", getBookById);
 // book delete route
+bookRouter.delete("/:bookId", authentication, deleteById);
 
 export default bookRouter;
