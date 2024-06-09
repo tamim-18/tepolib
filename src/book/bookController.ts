@@ -5,6 +5,7 @@ import cloudinary from "../config/cloudinary_config";
 import createHttpError from "http-errors";
 import bookModel from "./bookModel";
 import { AuthRequest } from "../middlewares/authenticate";
+import { promises } from "node:dns";
 
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
   const { title, genre } = req.body;
@@ -57,8 +58,11 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
 
 const updateBook = async (req: Request, res: Response, next: NextFunction) => {
   const { title, genre } = req.body;
+  console.log(req.body);
   const bookId = req.params.bookId;
-  const book = await bookModel.findOne({ _id: bookId });
+  // console.log(bookId);
+  const book = await bookModel.findOne({ _id: bookId }); // This is to check if the book exists
+  // console.log(book);
   if (!book) {
     return next(createHttpError(404, "Book not found"));
   }
@@ -69,7 +73,63 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
       createHttpError(403, "You are not authorized to update this book")
     );
   }
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] }; // Type assertion
+  // console.log(files);
+  let completeCoverImage = "";
+  if (files.coverImage) {
+    // delete the old cover image
+    const filename = files.coverImage[0].filename;
+    const coverImageMimeType = files.coverImage[0].mimetype.split("/")[-1];
+    const filePath = files.coverImage[0].path;
+    completeCoverImage = filename;
 
-  res.send("update book");
+    // upload the new cover image
+    const uploadResult = await cloudinary.uploader.upload(filePath, {
+      filename_override: filename, // This is the name of the file on Cloudinary
+      folder: "book-covers", // This is the folder where the file will be stored on Cloudinary
+      format: coverImageMimeType, // This is the format of the file
+    });
+
+    // delete the old cover image
+    completeCoverImage = uploadResult.secure_url; // This is the URL of the new cover image
+    console.log(completeCoverImage);
+    // delete the temporary file
+    await fs.promises.unlink(filePath);
+  }
+
+  let completeBook = "";
+  if (files.file) {
+    const bookFileName = files.file[0].filename;
+    const bookFilePath = files.file[0].path;
+    completeBook = `${bookFileName}.pdf`;
+    const bookUploadResult = await cloudinary.uploader.upload(bookFilePath, {
+      resource_type: "raw", // This is the type of the file.
+      filename_override: bookFileName,
+      folder: "books-pdf",
+      format: "pdf", // This is the format of the file
+    });
+    completeBook = bookUploadResult.secure_url;
+    // console.log("completeBook", completeBook);
+    await fs.promises.unlink(bookFilePath);
+  }
+
+  // update the book
+
+  const updateBoook = await bookModel.findOneAndUpdate(
+    {
+      _id: bookId,
+    },
+    {
+      title,
+      genre,
+      coverImage: completeCoverImage ? completeCoverImage : book.coverImage, // This is the URL of the new cover image. If the cover image is not updated, the old cover image will be used
+      file: completeBook ? completeBook : book.file, // This is the URL of the new book. If the book is not updated, the old book will be used
+    },
+    {
+      new: true, // This is to return the updated document
+    }
+  );
+
+  res.json(updateBoook);
 };
 export { createBook, updateBook };
