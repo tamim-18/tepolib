@@ -5,12 +5,12 @@ import cloudinary from "../config/cloudinary_config";
 import createHttpError from "http-errors";
 import bookModel from "./bookModel";
 import { AuthRequest } from "../middlewares/authenticate";
-import { promises } from "node:dns";
 
 // create a book
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
   const { title, genre } = req.body;
   const files = req.files as { [fieldname: string]: Express.Multer.File[] }; // Type assertion
+  console.log(files);
   const coverImageMimeType = files.coverImage[0].mimetype.split("/")[-1];
   const filePath = files.coverImage[0].path;
   const filename = files.coverImage[0].filename;

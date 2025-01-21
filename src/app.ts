@@ -10,7 +10,7 @@ app.use(express.json());
 //routes
 //http methods are:
 //GET, POST, PUT, DELETE
-app.get("/", (req, res, next) => {
+app.get("/", (req, res) => {
   res.json({ message: "Hello World" });
 });
 

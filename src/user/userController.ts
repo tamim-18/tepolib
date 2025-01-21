@@ -1,6 +1,9 @@
 import { User } from "./userTypes";
 // creating user
 
+import dotenv from "dotenv";
+dotenv.config();
+
 import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import createHttpError from "http-errors";
@@ -34,7 +37,7 @@ const createrUser = async (req: Request, res: Response, next: NextFunction) => {
   // hashig using bcrypt
 
   const hashedPassword = await bcrypt.hash(password, 10);
-
+  // console.log(hashedPassword);
   let newUser: User;
   try {
     newUser = await userModel.create({
@@ -42,6 +45,7 @@ const createrUser = async (req: Request, res: Response, next: NextFunction) => {
       email,
       password: hashedPassword,
     });
+    // console.log(newUser);
   } catch (error) {
     return next(createHttpError(500, "Something went wrong"));
   }
