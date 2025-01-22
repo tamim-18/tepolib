@@ -4,6 +4,8 @@
   "description": "The rest api project",
   "main": "index.js",
   "scripts": {
+    "build": "npm install",
+    "start": "node server.ts",
     "dev": "nodemon server.ts"
   },
   "keywords": [
